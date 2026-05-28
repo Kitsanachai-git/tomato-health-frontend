@@ -162,13 +162,17 @@ export class Analyze implements OnInit, OnDestroy {
 
     if (res?.id && res.id !== this.lastDiseaseId) {
       this.lastDiseaseId = res.id;
-      this.showBanner = true;
 
       const isDisease = res.disease_name !== 'Healthy';
+
+      // ถ้าไม่เจอโรค ไม่ต้องแจ้งเตือน
+      if (!isDisease) return;
+
+      this.showBanner = true;
       this.notifications.unshift({
         id: ++this.notifIdCounter,
-        type: isDisease ? 'disease' : 'healthy',
-        title: isDisease ? `ตรวจพบ: ${res.disease_name}` : 'มะเขือเทศสุขภาพดี',
+        type: 'disease',
+        title: `ตรวจพบ: ${res.disease_name}`,
         message: res.recommendation ?? '',
         time: `${this.date} ${this.time}`,
         read: false,

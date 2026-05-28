@@ -92,7 +92,7 @@
   <!-- ALERT BANNER เมื่อตรวจพบโรค -->
   <div
     class="alert-banner"
-    *ngIf="result && result.disease_name !== 'Healthy'"
+    *ngIf="result && result.disease_name?.toLowerCase() !== 'healthy' && showBanner"
     [@slideDown]
   >
     <mat-icon>warning</mat-icon>
