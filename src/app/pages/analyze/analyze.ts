@@ -21,6 +21,14 @@ export interface Notification {
   read: boolean;
 }
 
+export interface LeafResult {
+  id: number;
+  disease_name: string;
+  confidence: number;
+  recommendation: string;
+  crop_url: string;
+}
+
 @Component({
   selector: 'app-analyze',
   standalone: true,
@@ -55,7 +63,8 @@ export interface Notification {
 })
 export class Analyze implements OnInit, OnDestroy {
   imageUrl: any;
-  result: any;
+  leaves: LeafResult[] = [];
+  leafCount = 0;
   loading = true;
 
   date = '';
@@ -65,7 +74,7 @@ export class Analyze implements OnInit, OnDestroy {
 
   notifications: Notification[] = [];
   showBanner = true;
-  private lastDiseaseId: number | null = null;
+  private lastImageId: number | null = null;
   private notifIdCounter = 0;
   private intervalId: any;
   private countdownId: any;
@@ -80,10 +89,11 @@ export class Analyze implements OnInit, OnDestroy {
     return this.notifications.filter((n) => !n.read).length;
   }
 
-  get resultThemeClass() {
-    return this.result?.disease_name?.toLowerCase() === 'healthy'
-      ? 'healthy'
-      : 'disease';
+  // มีใบไหนเป็นโรคบ้างไหมในกลุ่มนี้
+  get hasDisease(): boolean {
+    return this.leaves.some(
+      (l) => l.disease_name?.toLowerCase() !== 'healthy',
+    );
   }
 
   get nextRefreshDisplay(): string {
@@ -121,11 +131,7 @@ export class Analyze implements OnInit, OnDestroy {
     const start = Date.now();
     this.loading = true;
 
-    this.api.getLatestImage().subscribe((img: any) => {
-      this.imageUrl = img?.image_url ?? null;
-    });
-
-    this.api.getLatestAIResult().subscribe((res: any) => {
+    this.api.getLatestImageGroup().subscribe((res: any) => {
       this.handleResult(res, Date.now() - start);
     });
   }
@@ -134,12 +140,7 @@ export class Analyze implements OnInit, OnDestroy {
     const start = Date.now();
     this.loading = true;
 
-    this.api.getLatestImage().subscribe((img: any) => {
-      this.imageUrl = img?.image_url ?? null;
-    });
-
-    // force=true → backend ส่ง email แม้ id จะซ้ำ
-    this.api.getLatestAIResultForce().subscribe((res: any) => {
+    this.api.getLatestImageGroup().subscribe((res: any) => {
       this.handleResult(res, Date.now() - start);
     });
 
@@ -148,7 +149,9 @@ export class Analyze implements OnInit, OnDestroy {
   }
 
   private handleResult(res: any, elapsed: number) {
-    this.result = res;
+    this.imageUrl = res?.image_url ?? null;
+    this.leaves = res?.leaves ?? [];
+    this.leafCount = res?.leaf_count ?? 0;
 
     const now = new Date();
     this.date = now.toLocaleDateString('th-TH', {
@@ -160,23 +163,26 @@ export class Analyze implements OnInit, OnDestroy {
     this.scanTime = elapsed + ' ms';
     this.loading = false;
 
-    if (res?.id && res.id !== this.lastDiseaseId) {
-      this.lastDiseaseId = res.id;
+    if (res?.image_id && res.image_id !== this.lastImageId) {
+      this.lastImageId = res.image_id;
 
-      const isDisease = res.disease_name !== 'Healthy';
-
-      // ถ้าไม่เจอโรค ไม่ต้องแจ้งเตือน
-      if (!isDisease) return;
+      if (!this.hasDisease) return;
 
       this.showBanner = true;
-      this.notifications.unshift({
-        id: ++this.notifIdCounter,
-        type: 'disease',
-        title: `ตรวจพบ: ${res.disease_name}`,
-        message: res.recommendation ?? '',
-        time: `${this.date} ${this.time}`,
-        read: false,
-      });
+
+      // แจ้งเตือนเฉพาะใบที่เป็นโรค
+      this.leaves
+        .filter((l) => l.disease_name?.toLowerCase() !== 'healthy')
+        .forEach((l) => {
+          this.notifications.unshift({
+            id: ++this.notifIdCounter,
+            type: 'disease',
+            title: `ตรวจพบ: ${l.disease_name}`,
+            message: l.recommendation ?? '',
+            time: `${this.date} ${this.time}`,
+            read: false,
+          });
+        });
 
       if (this.notifications.length > 20) {
         this.notifications = this.notifications.slice(0, 20);

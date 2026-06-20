@@ -89,16 +89,12 @@
     </div>
   </div>
 
-  <!-- ALERT BANNER เมื่อตรวจพบโรค -->
-  <div
-    class="alert-banner"
-    *ngIf="result && result.disease_name?.toLowerCase() !== 'healthy' && showBanner"
-    [@slideDown]
-  >
+  <!-- ALERT BANNER เมื่อตรวจพบโรคในกลุ่มนี้ -->
+  <div class="alert-banner" *ngIf="hasDisease && showBanner" [@slideDown]>
     <mat-icon>warning</mat-icon>
     <div class="alert-text">
-      <strong>ตรวจพบโรค: {{ result.disease_name }}</strong>
-      <span>{{ result.recommendation }}</span>
+      <strong>ตรวจพบโรคในภาพนี้ {{ leaves.length }} ใบ</strong>
+      <span>กรุณาตรวจสอบรายละเอียดด้านล่าง</span>
     </div>
     <button mat-icon-button (click)="dismissBanner()">
       <mat-icon>close</mat-icon>
@@ -107,12 +103,12 @@
 
   <!-- MAIN GRID -->
   <div class="main-grid">
-    <!-- LEFT: IMAGE PANEL -->
+    <!-- LEFT: IMAGE PANEL (ภาพหลัก) -->
     <mat-card class="image-panel" appearance="outlined">
       <mat-card-header>
         <mat-icon mat-card-avatar class="panel-icon">photo_camera</mat-icon>
         <mat-card-title>Latest Scan</mat-card-title>
-        <mat-card-subtitle>Real-time capture</mat-card-subtitle>
+        <mat-card-subtitle>พบทั้งหมด {{ leafCount }} ใบ</mat-card-subtitle>
       </mat-card-header>
 
       <mat-card-content class="image-content">
@@ -133,37 +129,6 @@
 
     <!-- RIGHT PANEL -->
     <div class="right-panel">
-      <!-- RESULT CARD -->
-      <mat-card *ngIf="result" class="result-card" [ngClass]="resultThemeClass">
-        <div class="result-inner">
-          <div class="result-label-group">
-            <mat-icon class="result-icon">auto_awesome</mat-icon>
-            <div>
-              <div class="result-label">{{ result.disease_name }}</div>
-              <div class="result-sub">AI Detection Result</div>
-            </div>
-          </div>
-          <div class="confidence-group">
-            <div class="confidence-value">
-              {{ (result.confidence * 100).toFixed(1) }}<span class="pct"
-                >%</span
-              >
-            </div>
-            <div class="confidence-bar-track">
-              <div
-                class="confidence-bar-fill"
-                [style.width.%]="result.confidence * 100"
-              ></div>
-            </div>
-            <div class="confidence-label">Confidence</div>
-          </div>
-        </div>
-        <div *ngIf="result.recommendation" class="recommendation">
-          <mat-icon>info_outline</mat-icon>
-          <span>{{ result.recommendation }}</span>
-        </div>
-      </mat-card>
-
       <!-- INFO TILES -->
       <div class="info-grid">
         <div class="info-tile">
@@ -207,33 +172,35 @@
         </div>
       </div>
 
-      <!-- SUMMARY CARD -->
+      <!-- SUMMARY CARD: crop grid ของแต่ละใบ -->
       <mat-card class="summary-card" appearance="outlined">
         <div class="summary-header">
           <mat-icon>insights</mat-icon>
-          <span>สรุปผลการวิเคราะห์</span>
+          <span>ผลตรวจแต่ละใบ ({{ leaves.length }})</span>
         </div>
-        <div class="summary-body">
-          <div class="summary-row">
-            <span class="summary-key">โรคที่ตรวจพบ</span>
-            <span class="summary-val">{{ result?.disease_name ?? '-' }}</span>
-          </div>
-          <div class="summary-row">
-            <span class="summary-key">ความมั่นใจ</span>
-            <span class="summary-val"
-              >{{ result ? (result.confidence * 100).toFixed(1) + '%' : '-'
-              }}</span
+
+        <div class="leaf-grid">
+          <div
+            *ngFor="let leaf of leaves"
+            class="leaf-tile"
+            [ngClass]="leaf.disease_name?.toLowerCase() === 'healthy' ? 'healthy' : 'disease'"
+          >
+            <img [src]="leaf.crop_url" class="leaf-thumb" />
+            <div class="leaf-info">
+              <span class="leaf-disease">{{ leaf.disease_name }}</span>
+              <span class="leaf-conf">{{ (leaf.confidence * 100).toFixed(1) }}%</span>
+            </div>
+            <div
+              class="leaf-rec"
+              *ngIf="leaf.disease_name?.toLowerCase() !== 'healthy'"
             >
+              {{ leaf.recommendation }}
+            </div>
           </div>
-          <div class="summary-row">
-            <span class="summary-key">วันที่สแกน</span>
-            <span class="summary-val">{{ date }} {{ time }}</span>
-          </div>
-          <div class="summary-row">
-            <span class="summary-key">คำแนะนำ</span>
-            <span class="summary-val rec"
-              >{{ result?.recommendation ?? '-' }}</span
-            >
+
+          <div *ngIf="leaves.length === 0 && !loading" class="no-leaves">
+            <mat-icon>image_not_supported</mat-icon>
+            <span>ยังไม่พบผลการตรวจ</span>
           </div>
         </div>
       </mat-card>

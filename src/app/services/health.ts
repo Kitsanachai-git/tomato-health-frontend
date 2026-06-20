@@ -28,4 +28,14 @@ export class Health {
   getLatestImage(): Observable<any> {
     return this.http.get(`${this.baseUrl}/images/latest?t=${Date.now()}`);
   }
+
+  // ===== เพิ่มใหม่: ดึงภาพล่าสุด + crop ทุกใบในภาพนั้น =====
+  getLatestImageGroup(): Observable<any> {
+    return this.http.get(
+      `${this.baseUrl}/ai-result/latest-group?t=${Date.now()}`,
+      {
+        withCredentials: true,
+      },
+    );
+  }
 }
