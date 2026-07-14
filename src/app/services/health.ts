@@ -6,7 +6,7 @@ import { Observable } from 'rxjs';
   providedIn: 'root',
 })
 export class Health {
-  private baseUrl = 'http://localhost:8000';
+  private baseUrl = '';
 
   constructor(private http: HttpClient) {}
 
