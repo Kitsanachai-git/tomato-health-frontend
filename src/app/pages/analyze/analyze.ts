@@ -70,7 +70,7 @@ export class Analyze implements OnInit, OnDestroy {
   date = '';
   time = '';
   scanTime = '-';
-  nextRefreshIn = 30 * 60;
+  nextRefreshIn = 10;
 
   notifications: Notification[] = [];
   showBanner = true;
@@ -121,9 +121,9 @@ export class Analyze implements OnInit, OnDestroy {
     this.intervalId = setInterval(
       () => {
         this.loadData();
-        this.nextRefreshIn = 30 * 60;
+        this.nextRefreshIn = 10;
       },
-      30 * 60 * 1000,
+      10 * 1000,
     );
   }
 
@@ -144,7 +144,7 @@ export class Analyze implements OnInit, OnDestroy {
       this.handleResult(res, Date.now() - start);
     });
 
-    this.nextRefreshIn = 30 * 60;
+    this.nextRefreshIn = 10;
     this.startAutoRefresh();
   }
 
