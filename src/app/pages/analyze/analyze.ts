@@ -81,6 +81,7 @@ export class Analyze implements OnInit, OnDestroy {
 
   uploading = false;
   uploadError = '';
+  private readonly maxUploadSizeBytes = 20 * 1024 * 1024; // 20MB
 
   constructor(
     private api: Health,
@@ -218,6 +219,12 @@ export class Analyze implements OnInit, OnDestroy {
     if (!file) return;
 
     this.uploadError = '';
+
+    if (file.size > this.maxUploadSizeBytes) {
+      this.uploadError = 'ไฟล์มีขนาดเกิน 20MB กรุณาเลือกไฟล์ที่เล็กกว่านี้';
+      return;
+    }
+
     this.uploading = true;
 
     this.api.uploadImage(file).subscribe({
