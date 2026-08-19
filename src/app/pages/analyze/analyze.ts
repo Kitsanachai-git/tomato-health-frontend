@@ -79,6 +79,9 @@ export class Analyze implements OnInit, OnDestroy {
   private intervalId: any;
   private countdownId: any;
 
+  uploading = false;
+  uploadError = '';
+
   constructor(
     private api: Health,
     private auth: Auth,
@@ -205,6 +208,27 @@ export class Analyze implements OnInit, OnDestroy {
   logout() {
     this.auth.logout().subscribe(() => {
       this.router.navigate(['/login']);
+    });
+  }
+
+  onFileSelected(event: Event) {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    input.value = ''; // เคลียร์ค่า input ไว้เพื่อให้เลือกไฟล์เดิมซ้ำได้
+    if (!file) return;
+
+    this.uploadError = '';
+    this.uploading = true;
+
+    this.api.uploadImage(file).subscribe({
+      next: () => {
+        this.uploading = false;
+        this.manualRefresh();
+      },
+      error: () => {
+        this.uploading = false;
+        this.uploadError = 'อัพโหลดไฟล์ไม่สำเร็จ กรุณาลองใหม่';
+      },
     });
   }
 }

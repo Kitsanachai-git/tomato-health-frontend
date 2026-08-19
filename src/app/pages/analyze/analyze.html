@@ -21,6 +21,24 @@
         {{ loading ? 'กำลังโหลด...' : 'รีเฟรช' }}
       </button>
 
+      <input
+        #fileInput
+        type="file"
+        accept="image/*"
+        hidden
+        (change)="onFileSelected($event)"
+      />
+      <button
+        mat-stroked-button
+        class="upload-btn"
+        [disabled]="uploading"
+        [matTooltip]="'อัพโหลดภาพใบมะเขือเทศ'"
+        (click)="fileInput.click()"
+      >
+        <mat-icon [class.spin]="uploading">upload</mat-icon>
+        {{ uploading ? 'กำลังอัพโหลด...' : 'อัพโหลดภาพ' }}
+      </button>
+
       <!-- NOTIFICATION BELL -->
       <button
         mat-icon-button
@@ -87,6 +105,15 @@
         ออกจากระบบ
       </button>
     </div>
+  </div>
+
+  <!-- UPLOAD ERROR -->
+  <div class="upload-error-banner" *ngIf="uploadError" [@slideDown]>
+    <mat-icon>error_outline</mat-icon>
+    <span>{{ uploadError }}</span>
+    <button mat-icon-button (click)="uploadError = ''">
+      <mat-icon>close</mat-icon>
+    </button>
   </div>
 
   <!-- ALERT BANNER เมื่อตรวจพบโรคในกลุ่มนี้ -->

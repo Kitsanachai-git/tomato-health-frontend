@@ -71,6 +71,19 @@ $radius-sm:  10px;
   &:disabled { opacity: .5; }
 }
 
+.upload-btn {
+  font-size: .82rem !important;
+  height: 34px !important;
+  padding: 0 12px !important;
+  border-radius: 8px !important;
+  border-color: $border !important;
+  color: $accent !important;
+  white-space: nowrap;
+  mat-icon { font-size: 17px; width: 17px; height: 17px; margin-right: 4px; }
+  &:hover { background: $accent-lt !important; }
+  &:disabled { opacity: .5; }
+}
+
 .logout-btn {
   font-size: .82rem !important;
   height: 34px !important;
@@ -195,6 +208,22 @@ $radius-sm:  10px;
     .notif-msg   { font-size: .78rem; color: $text-muted; margin-top: 2px; line-height: 1.4; }
     .notif-time  { font-size: .72rem; color: #9ab89a; margin-top: 4px; }
   }
+}
+
+// ─── UPLOAD ERROR BANNER ─────────────────────────────────
+.upload-error-banner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 20px;
+  background: #fef2f2;
+  border: 1px solid #f5c2c2;
+  border-radius: $radius-lg;
+  color: #b91c1c;
+
+  mat-icon:first-child { font-size: 20px; width: 20px; height: 20px; flex-shrink: 0; }
+  span { flex: 1; font-size: .85rem; }
+  button { color: #b91c1c !important; }
 }
 
 // ─── ALERT BANNER ────────────────────────────────────────
